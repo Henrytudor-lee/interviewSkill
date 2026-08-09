@@ -1,0 +1,24 @@
+{
+  "name": "interview-skill",
+  "version": "0.1.0",
+  "description": "Codex Skill — 面试官：简历评估 / 面试题生成 / 对话切分 / 报告生成",
+  "type": "module",
+  "bin": {
+    "interview": "./bin/interview.mjs"
+  },
+  "scripts": {
+    "start": "node bin/interview.mjs",
+    "questions": "node bin/interview.mjs questions",
+    "diarize": "node bin/interview.mjs diarize",
+    "evaluate": "node bin/interview.mjs evaluate",
+    "test": "node test/smoke.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "pdf-parse": "1.1.1"
+  },
+  "keywords": ["interview", "hr", "codex-skill", "llm"],
+  "license": "MIT"
+}
