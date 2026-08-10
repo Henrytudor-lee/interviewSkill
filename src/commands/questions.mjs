@@ -3,8 +3,8 @@ import { buildQuestionsPrompt } from "../prompts.mjs";
 
 /**
  * 生成面试题
- * options: { resume, job, count?, types?, difficulty?, focus? }
- *   默认: count=11 (客观6+主观5), types="客观,主观", difficulty="中级", focus=""
+ * options: { resume, job, count?, difficulty?, focus? }
+ *   默认: count=11 (客观6+主观5), difficulty="中级", focus=""
  */
 export async function runQuestions({
   resume,
@@ -18,11 +18,11 @@ export async function runQuestions({
     [
       {
         role: "system",
-        content: "你只输出严格 JSON，不要解释，不要在 JSON 外面加任何文字。",
+        content: "你是面试出题助手。直接输出严格 JSON，不思考、不解释。",
       },
       { role: "user", content: prompt },
     ],
-    { json: true, maxTokens: 8000 }
+    { json: true, maxTokens: 4000, temperature: 0.5 }
   );
   const data = extractJSON(text);
   let questions = data.questions || [];
@@ -58,9 +58,11 @@ export function questionsToMarkdown({ questions, difficulty, focus, job, candida
   let objIdx = 0;
   let subjIdx = 0;
   questions.forEach((q, i) => {
+    const answerLabel = q.type === "客观" ? "标准答案" : "评估要点";
     lines.push(`## ${i + 1}. [${q.type}] ${q.question}`);
     lines.push("");
-    lines.push(`**参考要点**：${q.reference}`);
+    // 答案如果是多行（如主观题的 bullet 列表）保留换行
+    lines.push(`**${answerLabel}**：${q.answer}`);
     lines.push("");
     if (q.type === "客观") objIdx++;
     else subjIdx++;

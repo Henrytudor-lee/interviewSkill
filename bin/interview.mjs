@@ -10,7 +10,8 @@
  * API key 优先级：--api-key > .env/.env.local > 环境变量 MINIMAX_API_KEY
  */
 
-import { existsSync, readFileSync, writeFile } from "fs";
+import { existsSync, readFileSync } from "fs";
+import { writeFile } from "fs/promises";
 import { readResume } from "../src/pdf.mjs";
 import { runQuestions, questionsToMarkdown } from "../src/commands/questions.mjs";
 import { runDiarize, turnsToMarkdown } from "../src/commands/diarize.mjs";
@@ -108,7 +109,7 @@ async function maybeWriteOutput(path, content) {
     process.stdout.write(content);
     if (!content.endsWith("\n")) process.stdout.write("\n");
   } else {
-    await writeFile(path, content, "utf8");
+    await writeFile(path, content);
     console.error(`✓ 已写入 ${path}（${content.length} 字符）`);
   }
 }
@@ -189,7 +190,7 @@ async function main() {
     console.error(`生成报告 (type=${reportType}, stream)...`);
     let buf = "";
     if (args.output) {
-      const ws = (await import("fs")).createWriteStream(args.output, "utf8");
+      const ws = (await import("fs")).createWriteStream(args.output);
       for await (const chunk of runEvaluate({
         resume,
         job,
