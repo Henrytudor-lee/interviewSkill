@@ -60,6 +60,8 @@ metadata:
 
 后续 Stage 都复用这两个文件。
 
+**Stage 1 → Stage 2 衔接**：只要简历 + title + requirements 三个核心信息齐全，**立即进入 Stage 2**，不要询问"是否生成面试题"。只有当用户明确说"先不生成题目"或"跳过 Stage 2"时才跳过。
+
 ### Stage 2：面试题（可选，必须用 CLI）
 
 **必须执行的命令**：
@@ -95,6 +97,8 @@ cat /tmp/<candidate>_questions.md
 
 ### Stage 3：对话切分（必须用 CLI）
 
+**Stage 2 → Stage 3 衔接**：用户确认题目完成（或直接说"下一步 / 生成报告"），**立即进入 Stage 3**，不要询问"是否继续"。
+
 ```bash
 node /Volumes/world/program/interview-skill/bin/interview.mjs diarize \
   --resume /tmp/<candidate>_resume.<ext> \
@@ -106,6 +110,8 @@ node /Volumes/world/program/interview-skill/bin/interview.mjs diarize \
 完成后 `cat /tmp/<candidate>_diarized.md` 展示给用户。
 
 ### Stage 4：评估报告（必须用 CLI）
+
+**Stage 3 → Stage 4 衔接**：对话切分完成 + 候选人姓名已知，**立即进入 Stage 4**，不要询问"是否生成报告"。
 
 ```bash
 node /Volumes/world/program/interview-skill/bin/interview.mjs evaluate \
