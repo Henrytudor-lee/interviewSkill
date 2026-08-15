@@ -157,6 +157,8 @@ async function main() {
       questions: result.questions,
       difficulty: result.difficulty,
       focus: result.focus,
+      candidateLevel: result.candidateLevel,
+      levelReason: result.levelReason,
       job,
       candidateName,
     });

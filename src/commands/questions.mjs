@@ -22,10 +22,12 @@ export async function runQuestions({
       },
       { role: "user", content: prompt },
     ],
-    { json: true, maxTokens: 4000, temperature: 0.5 }
+    { json: true, maxTokens: 8000, temperature: 0.5 }
   );
   const data = extractJSON(text);
   let questions = data.questions || [];
+  const candidateLevel = data.candidateLevel || "";
+  const levelReason = data.levelReason || "";
 
   // 按 count 截断
   if (questions.length > count) {
@@ -36,13 +38,13 @@ export async function runQuestions({
     questions = [...objective.slice(0, objTarget), ...subjective.slice(0, subjTarget)];
   }
 
-  return { questions, difficulty, focus };
+  return { questions, difficulty, focus, candidateLevel, levelReason };
 }
 
 /**
  * 把 questions 格式化成 Markdown
  */
-export function questionsToMarkdown({ questions, difficulty, focus, job, candidateName }) {
+export function questionsToMarkdown({ questions, difficulty, focus, job, candidateName, candidateLevel, levelReason }) {
   const lines = [];
   lines.push(`# 面试题`);
   lines.push("");
@@ -51,6 +53,7 @@ export function questionsToMarkdown({ questions, difficulty, focus, job, candida
   lines.push(`> **难度**：${difficulty}`);
   if (focus) lines.push(`> **重点技能**：${focus}`);
   lines.push(`> **题目数量**：${questions.length} 道`);
+  if (candidateLevel) lines.push(`> **候选人画像**：${candidateLevel}${levelReason ? `（${levelReason}）` : ""}`);
   lines.push("");
   lines.push("---");
   lines.push("");
@@ -61,7 +64,6 @@ export function questionsToMarkdown({ questions, difficulty, focus, job, candida
     const answerLabel = q.type === "客观" ? "标准答案" : "评估要点";
     lines.push(`## ${i + 1}. [${q.type}] ${q.question}`);
     lines.push("");
-    // 答案如果是多行（如主观题的 bullet 列表）保留换行
     lines.push(`**${answerLabel}**：${q.answer}`);
     lines.push("");
     if (q.type === "客观") objIdx++;
