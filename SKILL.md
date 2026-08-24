@@ -54,13 +54,39 @@ metadata:
 收集完后，把简历和岗位 JSON 写到临时文件：
 
 ```bash
-# 简历保存到 /tmp/<candidate>_resume.txt（或 .pdf / .md）
-# 岗位 JSON 保存到 /tmp/<candidate>_job.json
+# 简历保存到 <output_dir>/<candidate>_resume.<ext>
+# 岗位 JSON 保存到 <output_dir>/<candidate>_job.json
 ```
 
 后续 Stage 都复用这两个文件。
 
 **Stage 1 → Stage 2 衔接**：只要简历 + title + requirements 三个核心信息齐全，**立即进入 Stage 2**，不要询问"是否生成面试题"。只有当用户明确说"先不生成题目"或"跳过 Stage 2"时才跳过。
+
+## ⚠️ 输出文件路径（必须遵守）
+
+**默认（用户没指定工作区）**：所有文件落到 `/tmp/<candidate>_<purpose>.{txt,md,json,pdf}`
+
+**如果用户提供了工作区目录**，文件必须落在工作区内：
+
+| 用户语境 | 工作区路径 |
+|---|---|
+| "工作目录是 X / 工作区是 X / 项目目录 X" | 用户说的 X |
+| "输出到这个文件夹 / 放到 X / 保存到 X" | 用户说的 X |
+| 用户提供的简历路径是 `<dir>/xxx.pdf`，且没说其他 | `<dir>`（简历所在目录） |
+| 用户列出的目录（`ls /Volumes/other/epro/` 等） | 该目录 |
+
+**路径模板**（用户给了工作区 `<ws>` 后）：
+
+- 简历 → `<ws>/<candidate>_resume.<ext>`
+- 岗位 JSON → `<ws>/<candidate>_job.json`
+- 对话文本 → `<ws>/<candidate>_dialogue.txt`
+- 面试题 → `<ws>/<candidate>_questions.md`
+- 切分结果 → `<ws>/<candidate>_diarized.md`
+- 报告 → `<ws>/<candidate>_report.md`
+
+**判断不出来时**：用默认 /tmp/，并在展示文件路径时告知用户"已保存到 /tmp/xxx（如需放到指定目录请告诉我）"。
+
+---
 
 ### Stage 2：面试题（可选，必须用 CLI）
 
@@ -68,10 +94,10 @@ metadata:
 
 ```bash
 node /Volumes/world/program/interview-skill/bin/interview.mjs questions \
-  --resume /tmp/<candidate>_resume.<ext> \
-  --job-json @/tmp/<candidate>_job.json \
+  --resume <output_dir>/<candidate>_resume.<ext> \
+  --job-json @<output_dir>/<candidate>_job.json \
   [--count 11] [--difficulty 中级] [--focus "关键词1,关键词2"] \
-  --output /tmp/<candidate>_questions.md
+  --output <output_dir>/<candidate>_questions.md
 ```
 
 **参数默认值**：
@@ -83,7 +109,7 @@ node /Volumes/world/program/interview-skill/bin/interview.mjs questions \
 **完成后**：
 
 ```bash
-cat /tmp/<candidate>_questions.md
+cat <output_dir>/<candidate>_questions.md
 ```
 
 把完整内容（**含"标准答案 / 评估要点"段**）原样展示给用户。
@@ -101,13 +127,13 @@ cat /tmp/<candidate>_questions.md
 
 ```bash
 node /Volumes/world/program/interview-skill/bin/interview.mjs diarize \
-  --resume /tmp/<candidate>_resume.<ext> \
-  --job-json @/tmp/<candidate>_job.json \
-  --dialogue /tmp/<candidate>_dialogue.txt \
-  --output /tmp/<candidate>_diarized.md
+  --resume <output_dir>/<candidate>_resume.<ext> \
+  --job-json @<output_dir>/<candidate>_job.json \
+  --dialogue <output_dir>/<candidate>_dialogue.txt \
+  --output <output_dir>/<candidate>_diarized.md
 ```
 
-完成后 `cat /tmp/<candidate>_diarized.md` 展示给用户。
+完成后 `cat <output_dir>/<candidate>_diarized.md` 展示给用户。
 
 ### Stage 4：评估报告（必须用 CLI）
 
@@ -115,12 +141,12 @@ node /Volumes/world/program/interview-skill/bin/interview.mjs diarize \
 
 ```bash
 node /Volumes/world/program/interview-skill/bin/interview.mjs evaluate \
-  --resume /tmp/<candidate>_resume.<ext> \
-  --job-json @/tmp/<candidate>_job.json \
-  --dialogue /tmp/<candidate>_dialogue.txt \
+  --resume <output_dir>/<candidate>_resume.<ext> \
+  --job-json @<output_dir>/<candidate>_job.json \
+  --dialogue <output_dir>/<candidate>_dialogue.txt \
   --report-type comprehensive \
   --candidate-name "<候选人姓名>" \
-  --output /tmp/<candidate>_report.md
+  --output <output_dir>/<candidate>_report.md
 ```
 
 报告类型：
@@ -128,7 +154,7 @@ node /Volumes/world/program/interview-skill/bin/interview.mjs evaluate \
 - `professional`（专业型）
 - `concise`（简洁型）
 
-完成后 `cat /tmp/<candidate>_report.md` 展示给用户（**必须包含末尾"面试评价总结"段**）。
+完成后 `cat <output_dir>/<candidate>_report.md` 展示给用户（**必须包含末尾"面试评价总结"段**）。
 
 ### Stage 5：追问 & 收尾
 
@@ -142,7 +168,7 @@ node /Volumes/world/program/interview-skill/bin/interview.mjs evaluate \
 1. **API key** 通过 `MINIMAX_API_KEY` 环境变量 / `.env.local` 读取。
 2. **绝对路径**：所有 node 命令必须用 `/Volumes/world/program/interview-skill/bin/interview.mjs` 全路径。
 3. **简历和岗位** 一旦收集完整，后续 Stage 都复用，**不要让用户重复提供**。
-4. **临时文件路径**：统一用 `/tmp/<candidate>_<purpose>.{txt,md,json,pdf}`。
+4. **文件路径**：用 `<output_dir>/<candidate>_<purpose>.{txt,md,json,pdf}`，见上方"输出文件路径"规则。
 5. **遇到错误**：把 CLI 的 stderr 完整展示给用户，让用户决定是否重试。
 6. **不要修改 prompt 文件**（`prompts/*.txt`）除非用户明确要求。
 
